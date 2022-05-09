@@ -41,13 +41,7 @@ import pefile
 
 def get_optional_header_features(path):
     print("get optional header in ", path)
-    with open(path, 'rb') as fp:
-        flag1 = fp.read(2) #读取文件前两个字节
-        fp.seek(0x3c) #获取PE头偏移
-        offset = ord(fp.read(1))
-        fp.seek(offset)
-        flag2 = fp.read(4) #获取PE头签名
-    if flag1==b'MZ' and flag2==b'PE\x00\x00': #判断是否为PE文件的典型特征签名
+    try: 
         pe = pefile.PE(path)
         optional_header = [pe.OPTIONAL_HEADER.Magic, pe.OPTIONAL_HEADER.MajorLinkerVersion, pe.OPTIONAL_HEADER.MinorLinkerVersion,
         pe.OPTIONAL_HEADER.SizeOfCode, pe.OPTIONAL_HEADER.SizeOfInitializedData, pe.OPTIONAL_HEADER.SizeOfUninitializedData, 
@@ -60,7 +54,8 @@ def get_optional_header_features(path):
         pe.OPTIONAL_HEADER.SizeOfStackReserve, pe.OPTIONAL_HEADER.SizeOfStackCommit, pe.OPTIONAL_HEADER.SizeOfHeapReserve, 
         pe.OPTIONAL_HEADER.SizeOfHeapCommit, pe.OPTIONAL_HEADER.LoaderFlags, pe.OPTIONAL_HEADER.NumberOfRvaAndSizes]
         return optional_header
-    else:
+    except:
+        print(path, "is not pe file")
         return [0 for i in range(30)]
 
 def scan_file(path):
